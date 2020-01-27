@@ -1,5 +1,5 @@
-## Projet module M4101C de Programmation Système Avancée ##
+# Projet module M4101C de Programmation Système Avancée #
 
-# Membres #
+## Membres ##
     BOURDIN Maxence
     FROISSART Kévin
