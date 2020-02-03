@@ -26,16 +26,9 @@ int main (void)
 
 	const char * message_bienvenue = "Bonjour, bienvenue sur mon serveur\n Ce serveur a ete cree par les soins de Maxence et Kevin\n Ce n'est que le début mais il devrait vite y avoir des ameliorations\n Voici un passage d'Harry Potter en anglais\n Cela vous permettra de travailler votre anglais\n et aussi vous rappeler quelques souvenirs\n\" if you want to go back, I won’t blame you, \" he [Harry] said.\n\" You can take the Cloak, I won’t need it now. \"\n\" Don’t be stupid, \" said Ron.\n\" We’re coming, \" said Hermione.\n";
 
-	int i;
-
-	for(i = 0; i<10; i++){
-		write(socket_client, message_bienvenue, strlen(message_bienvenue));
+	while(write(socket_client, message_bienvenue, strlen(message_bienvenue)) > 0){
 		sleep(1);
 	}
-
-	/*while(write(socket_client, message_bienvenue, strlen(message_bienvenue)) > 0){
-		
-	}*/
 		
 	return 0;
 }
