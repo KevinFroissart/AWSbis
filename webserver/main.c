@@ -5,6 +5,15 @@
 #include <netinet/in.h>
 #include <unistd.h>
 #include "socket.h"
+#include <signal.h>
+
+void initialiser_signaux(void) 
+{
+	if (signal(SIGPIPE, SIG_IGN) == SIG_ERR)
+	{
+		perror ("signal");
+	}
+}
 
 int main (void)
 {
@@ -18,7 +27,7 @@ int main (void)
 	int socket_client;
 
 	socket_client = accept(socket_serveur, NULL, NULL);
-		
+
 	if(socket_client == -1){
 		perror("accept");
 		return -1;
@@ -34,6 +43,9 @@ int main (void)
 		write(socket_client, buff, sizeof(buff));
 		memset(buff, 0, sizeof(buff));
 	}
-		
+
+	initialiser_signaux();
+
 	return 0;
 }
+
