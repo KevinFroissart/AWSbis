@@ -31,24 +31,27 @@ int main (void)
 
 		socket_client = accept(socket_serveur, NULL, NULL);
 
+		if(fork() != 0) 
+			close(socket_client);
+
 		if(socket_client == -1){
 			perror("accept");
 			return -1;
 		}
 
 		const char * message_bienvenue = "Bonjour, bienvenue sur mon serveur\n Ce serveur a ete cree par les soins de Maxence et Kevin\n Ce n'est que le début mais il devrait vite y avoir des ameliorations\n Voici un passage d'Harry Potter en anglais\n Cela vous permettra de travailler votre anglais\n et aussi vous rappeler quelques souvenirs\n\" if you want to go back, I won’t blame you, \" he [Harry] said.\n\" You can take the Cloak, I won’t need it now. \"\n\" Don’t be stupid, \" said Ron.\n\" We’re coming, \" said Hermione.\n";
+
 		char buff[256];
 
 		write(socket_client, message_bienvenue, strlen(message_bienvenue));
 		memset(buff, 0, sizeof(buff));
 
-		while(read(socket_client, buff, sizeof(buff))){
+		while(read(socket_client, buff, sizeof(buff)) > 0){
 			write(socket_client, buff, sizeof(buff));
 			memset(buff, 0, sizeof(buff));
 		}
-
+		
 	}
 
 	return 0;
 }
-
