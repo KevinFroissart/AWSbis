@@ -9,10 +9,12 @@
 #include <sys/wait.h>
 #include <stdlib.h>
 
+pid_t fils;
+
 void traitement_signal(int sig)
 {
 	printf("Signal %d reçu \n", sig);
-	waitpid(psuh, NULL, WEXITED);
+	waitpid(fils, NULL, 0);
 }
 
 void initialiser_signaux(void) 
@@ -53,7 +55,7 @@ int main (void)
 			return -1;
 		}
 
-		if(fork() != 0) {
+		if((fils = fork()) != 0) {
 			close(socket_client);
 
 		} else {
