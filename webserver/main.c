@@ -40,7 +40,7 @@ int main (void)
 		fprintf(stderr, "Erreur lors de la création du serveur");
 		return -1;
 	}
-
+	
 	while(1) {
 
 		int socket_client;
@@ -66,7 +66,8 @@ int main (void)
 			memset(buff, 0, sizeof(buff));
 
 			while(fgets(buff, sizeof(buff), f1) != NULL){
-				fprintf(f1, buff);
+				//fprintf(f1, buff);
+				fprintf(stdout, buff);
 				memset(buff, 0, sizeof(buff));
 			}
 			fclose(f1);
