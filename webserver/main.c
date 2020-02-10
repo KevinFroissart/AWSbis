@@ -57,25 +57,24 @@ int main (void)
 			const char * message_bienvenue = "Bonjour, bienvenue sur mon serveur\nCe serveur a ete cree par les soins de Maxence et Kevin\nCe n'est que le début mais il devrait vite y avoir des ameliorations\nVoici un passage d'Harry Potter en anglais\nCela vous permettra de travailler votre anglais\net aussi vous rappeler quelques souvenirs\n\" if you want to go back, I won’t blame you, \" he [Harry] said.\n\" You can take the Cloak, I won’t need it now. \"\n\" Don’t be stupid, \" said Ron.\n\" We’re coming, \" said Hermione.\n";
 
 			char buff[256];
-			
+
 			FILE * f1;
 			if((f1 = fdopen(socket_client, "a+")) == NULL)
 				perror("fdopen");
-			
-			fprintf(f1, "<AWSBis>: %s", message_bienvenue);
-								memset(buff, 0, sizeof(buff));
 
-			//char subbuff[18] = "";
-			char * streamed = fgets(buff, sizeof(buff), f1);
-			char * get = streamed;
-			//fprintf(stdout, subbuff);
-			if(strcmp(get,"GET / HTTP/1.1\r\n") == 0) {
-				while(streamed != NULL){
-					fprintf(stdout, buff);
-					streamed = fgets(buff, sizeof(buff), f1);					
-				}
+			fgets(buff, sizeof(buff), f1);
+
+			if(strncmp(buff, "GET / HTTP/1.1\r\n", 18) == 0){
+				int taille = 10 + strlen(message_bienvenue);
+				fprintf(stdout,"HTTP/1.1 200 OK\r\nContent-Length: "+ taille);
+				fprintf(f1, "<AWSBis>: %s", message_bienvenue);
 			} else {
-				fprintf(stdout, "HTTP/1.1 400 Bad Request\r\nConnection: close\r\nContent-Length: 17\r\n");
+				fprintf(stdout,"HTTP/1.1 400 Bad Request\r\nConnection: close\r\nContent-Length: 17");
+			}
+
+			fprintf(f1, "<AWSBis>: %s", message_bienvenue);
+			while(fgets(buff, sizeof(buff), f1) != NULL){
+				fprintf(stdout, buff);
 			}
 			fclose(f1);
 			exit(1);
