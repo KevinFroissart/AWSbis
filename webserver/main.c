@@ -65,12 +65,15 @@ int main (void)
 			fgets(buff, sizeof(buff), f1);
 
 			if(strncmp(buff, "GET / HTTP/1.1\r\n", 18) == 0){
-				fprintf(stdout,  "HTTP/1.1 200 OK\r\nConnection: close\r\nContent-Length: 7\r\n\r\n");
+				fprintf(stdout,  "HTTP/1.1 200 OK\r\nConnection: close\r\nContent-Length: 489\r\n\r\n");
 				fprintf(f1, "HTTP/1.1 200 OK\r\nConnection: close\r\nContent-Length: 489\r\n\r\n");
 				fprintf(f1, "<AWSBis>: %s", message_bienvenue);
+			} else if(strncmp(buff, "GET /inexistant HTTP/1.1", 18) == 0){
+				fprintf(stdout,  "HTTP/1.1 404 Not Found\r\nConnection: close\r\nContent-Length: 0\r\n\r\n");
+				fprintf(f1, "HTTP/1.1 404 Not Found\r\nConnection: close\r\nContent-Length: 0\r\n\r\n");
 			} else {
-				fprintf(f1,"HTTP/1.1 400 Bad Request\r\nConnection: close\r\nContent-Length: 17\r\n\r\n");
-				fprintf(stdout,"HTTP/1.1 400 Bad Request\r\nConnection: close\r\nContent-Length: 17\r\n\r\n");
+				fprintf(stdout,"HTTP/1.1 400 Bad Request\r\nConnection: close\r\nContent-Length: 0\r\n\r\n");
+				fprintf(f1,"HTTP/1.1 400 Bad Request\r\nConnection: close\r\nContent-Length: 0\r\n\r\n");
 			}
 
 			fprintf(f1, "<AWSBis>: %s", message_bienvenue);
