@@ -63,17 +63,19 @@ int main (void)
 				perror("fdopen");
 			
 			fprintf(f1, "<AWSBis>: %s", message_bienvenue);
-			memset(buff, 0, sizeof(buff));
+								memset(buff, 0, sizeof(buff));
 
-			while(fgets(buff, sizeof(buff), f1) != NULL){
-				//fprintf(f1, buff);
-				
-				
-				char entete[18];
-				//strncpy(entete, buff, 18);
-				printf(entete);
-				//fprintf(stdout, buff);
-				memset(buff, 0, sizeof(buff));
+			//char subbuff[18] = "";
+			char * streamed = fgets(buff, sizeof(buff), f1);
+			char * get = streamed;
+			//fprintf(stdout, subbuff);
+			if(strcmp(get,"GET / HTTP/1.1\r\n") == 0) {
+				while(streamed != NULL){
+					fprintf(stdout, buff);
+					streamed = fgets(buff, sizeof(buff), f1);					
+				}
+			} else {
+				fprintf(stdout, "HTTP/1.1 400 Bad Request\r\nConnection: close\r\nContent-Length: 17\r\n");
 			}
 			fclose(f1);
 			exit(1);
