@@ -54,7 +54,7 @@ int main (void)
 			close(socket_client);
 
 		} else {
-			//const char * message_bienvenue = "Bonjour, bienvenue sur mon serveur\nCe serveur a ete cree par les soins de Maxence et Kevin\nCe n'est que le début mais il devrait vite y avoir des ameliorations\nVoici un passage d'Harry Potter en anglais\nCela vous permettra de travailler votre anglais\net aussi vous rappeler quelques souvenirs\n\" if you want to go back, I won’t blame you, \" he [Harry] said.\n\" You can take the Cloak, I won’t need it now. \"\n\" Don’t be stupid, \" said Ron.\n\" We’re coming, \" said Hermione.\n";
+			const char * message_bienvenue = "Bonjour, bienvenue sur mon serveur\nCe serveur a ete cree par les soins de Maxence et Kevin\nCe n'est que le début mais il devrait vite y avoir des ameliorations\nVoici un passage d'Harry Potter en anglais\nCela vous permettra de travailler votre anglais\net aussi vous rappeler quelques souvenirs\n\" if you want to go back, I won’t blame you, \" he [Harry] said.\n\" You can take the Cloak, I won’t need it now. \"\n\" Don’t be stupid, \" said Ron.\n\" We’re coming, \" said Hermione.\n";
 
 			char buff[8192];
 
@@ -65,12 +65,9 @@ int main (void)
 			fgets(buff, sizeof(buff), f1);
 
 			if(strncmp(buff, "GET / HTTP/1.1\r\n", 18) == 0){
-				char * msg = "HTTP/1.1 200 OK\r\nConnection: close\r\nContent-Length: 17\r\n\r\n";
-				fprintf(stdout, msg);
-				fprintf(f1, msg);
-			} else if(strncmp(buff, "GET /inexistant HTTP/1.1", 24) == 0){
-				fprintf(f1, "q");
-				fprintf(stdout, "q");
+				fprintf(stdout,  "HTTP/1.1 200 OK\r\nConnection: close\r\nContent-Length: 7\r\n\r\n");
+				fprintf(f1, "HTTP/1.1 200 OK\r\nConnection: close\r\nContent-Length: 489\r\n\r\n");
+				fprintf(f1, "<AWSBis>: %s", message_bienvenue);
 			} else {
 				fprintf(f1,"HTTP/1.1 400 Bad Request\r\nConnection: close\r\nContent-Length: 17\r\n\r\n");
 				fprintf(stdout,"HTTP/1.1 400 Bad Request\r\nConnection: close\r\nContent-Length: 17\r\n\r\n");
