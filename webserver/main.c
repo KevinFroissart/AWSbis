@@ -8,6 +8,7 @@
 #include <signal.h>
 #include <sys/wait.h>
 #include <stdlib.h>
+#include "http_parse.h"
 
 pid_t fils;
 
@@ -69,11 +70,15 @@ int main (void)
 
 			char buff[8192];
 
+			struct http_request = NULL;
+
 			FILE * f1;
 			if((f1 = fdopen(socket_client, "a+")) == NULL)
 				perror("fdopen");
 
 			fgets_or_exit(buff, sizeof(buff), f1);
+
+			int parse_http_request(const char &buff , http_request &http_request);
 
 			if(strncmp(buff, "GET / HTTP/1.1\r\n", 18) == 0){
 				fprintf(stdout,  "HTTP/1.1 200 OK\r\nConnection: close\r\nContent-Length: 489\r\n\r\n");
