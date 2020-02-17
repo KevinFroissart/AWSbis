@@ -31,6 +31,17 @@ void initialiser_signaux(void)
 		perror("sigaction(SIGCHLD)");
 }
 
+char * fgets_or_exit(char *buffer, int size, FILE *stream){
+	char * res = "";
+	if((res = fgets(buffer, size, stream)) == NULL)
+		exit(-1);
+	return res;
+}
+
+int parse_http_request(const char *request_line, http_request *request){
+
+}
+
 int main (void)
 {
 	initialiser_signaux();
@@ -62,7 +73,7 @@ int main (void)
 			if((f1 = fdopen(socket_client, "a+")) == NULL)
 				perror("fdopen");
 
-			fgets(buff, sizeof(buff), f1);
+			fgets_or_exit(buff, sizeof(buff), f1);
 
 			if(strncmp(buff, "GET / HTTP/1.1\r\n", 18) == 0){
 				fprintf(stdout,  "HTTP/1.1 200 OK\r\nConnection: close\r\nContent-Length: 489\r\n\r\n");
@@ -75,12 +86,7 @@ int main (void)
 				fprintf(stdout,"HTTP/1.1 400 Bad Request\r\nConnection: close\r\nContent-Length: 0\r\n\r\n");
 				fprintf(f1,"HTTP/1.1 400 Bad Request\r\nConnection: close\r\nContent-Length: 0\r\n\r\n");
 			}
-
-			fprintf(f1, "<AWSBis>: %s", message_bienvenue);
-			while(fgets(buff, sizeof(buff), f1) != NULL){
-				fprintf(stdout, buff);
-			}
-			fclose(f1);
+			fclose(f1);			
 			exit(1);
 		}
 	}
