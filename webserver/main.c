@@ -58,7 +58,7 @@ void send_status(FILE *client, int code, const char *reason_phrase){
 void send_response(FILE *client, int code, const char *reason_phrase, const char *message_body){
 	char msg[512];
 	send_status(client, code, reason_phrase);
-	sprintf(msg, "Connection: close\r\nContent-Length: %lu\r\n\r\n", sizeof(message_body));	
+	sprintf(msg, "Connection: close\r\nContent-Length: %lu\r\n\r\n", strlen(message_body));	
 	fprintf(client, msg);
 	fprintf(client, message_body);
 }
@@ -110,29 +110,6 @@ int main (void)
 				send_response(f1, 200, "OK", message_bienvenue);
 			else
 				send_response(f1, 404, "Not Found", "Not Found\r\n");
-
-/*			if(requete.method == HTTP_GET){
-				send_status(f1, 200, "OK");
-				//fprintf(f1, "HTTP/1.1 200 OK\r\nConnection: close\r\nContent-Length: 491\r\n\r\n");
-				
-				fprintf(f1, "<AWSBis>: %s", message_bienvenue);
-				
-			} else {
-				fprintf(f1,"HTTP/1.1 400 Bad Request\r\nConnection: close\r\nContent-Length: 0\r\n\r\n");
-				fprintf(stdout,"HTTP/1.1 400 Bad Request\r\nConnection: close\r\nContent-Length: 0\r\n\r\n");
-			}
-*/
-		/*	if(strncmp(buff, "GET / HTTP/1.1\r\n", 18) == 0){
-				fprintf(stdout,  "HTTP/1.1 200 OK\r\nConnection: close\r\nContent-Length: 489\r\n\r\n");
-				fprintf(f1, "HTTP/1.1 200 OK\r\nConnection: close\r\nContent-Length: 489\r\n\r\n");
-				fprintf(f1, "<AWSBis>: %s", message_bienvenue);
-			} else if(strcmp(buff, "GET /inexistant HTTP/1.1\r\n") == 0){
-				fprintf(stdout,  "HTTP/1.1 404 Not Found\r\nConnection: close\r\nContent-Length: 0\r\n\r\n");
-				fprintf(f1, "HTTP/1.1 404 Not Found\r\nConnection: close\r\nContent-Length: 0\r\n\r\n");
-			} else {
-				fprintf(stdout,"HTTP/1.1 400 Bad Request\r\nConnection: close\r\nContent-Length: 0\r\n\r\n");
-				fprintf(f1,"HTTP/1.1 400 Bad Request\r\nConnection: close\r\nContent-Length: 0\r\n\r\n");
-			}*/
 			fclose(f1);			
 			exit(1);
 		}
