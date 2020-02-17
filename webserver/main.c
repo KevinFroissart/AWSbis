@@ -39,7 +39,15 @@ char * fgets_or_exit(char *buffer, int size, FILE *stream){
 	return res;
 }
 
-int parse_http_request(const char *request_line, http_request *request){
+void skip_headers(FILE *client){
+	char uselessBuffer[8216];
+	while(fgets_or_exit(uselessBuffer, sizeof(uselessBuffer), client) != NULL){
+		if(strncmp(uselessBuffer, "\r\n", 2) == 0 || strncmp(uselessBuffer, "\n", 1) == 0)
+			break;
+	}
+}
+
+void send_status(FILE *client, int code, const char *reason_phrase){
 
 }
 
@@ -66,11 +74,11 @@ int main (void)
 			close(socket_client);
 
 		} else {
-			const char * message_bienvenue = "Bonjour, bienvenue sur mon serveur\nCe serveur a ete cree par les soins de Maxence et Kevin\nCe n'est que le début mais il devrait vite y avoir des ameliorations\nVoici un passage d'Harry Potter en anglais\nCela vous permettra de travailler votre anglais\net aussi vous rappeler quelques souvenirs\n\" if you want to go back, I won’t blame you, \" he [Harry] said.\n\" You can take the Cloak, I won’t need it now. \"\n\" Don’t be stupid, \" said Ron.\n\" We’re coming, \" said Hermione.\n";
+			const char * message_bienvenue = "Bonjour, bienvenue sur mon serveur\nCe serveur a ete cree par les soins de Maxence et Kevin\nCe n'est que le début mais il devrait vite y avoir des ameliorations\nVoici un passage d'Harry Potter en anglais\nCela vous permettra de travailler votre anglais\net aussi vous rappeler quelques souvenirs\n\" if you want to go back, I won’t blame you, \" he [Harry] said.\n\" You can take the Cloak, I won’t need it now. \"\n\" Don’t be stupid, \" said Ron.\n\" We’re coming, \" said Hermione.\n\n\n";
 
 			char buff[8192];
 
-			struct http_request = NULL;
+			http_request requete;
 
 			FILE * f1;
 			if((f1 = fdopen(socket_client, "a+")) == NULL)
@@ -78,9 +86,22 @@ int main (void)
 
 			fgets_or_exit(buff, sizeof(buff), f1);
 
-			int parse_http_request(const char &buff , http_request &http_request);
+			if(parse_http_request(buff, &requete) == 0)
+				fprintf(stdout, "Requete invalide !\n");
 
-			if(strncmp(buff, "GET / HTTP/1.1\r\n", 18) == 0){
+			skip_headers(f1);
+
+			if(requete.method == HTTP_GET){
+				fprintf(stdout, requete.target);
+				fprintf(f1, "HTTP/1.1 200 OK\r\nConnection: close\r\nContent-Length: 491\r\n\r\n");
+				fprintf(f1, "<AWSBis>: %s", message_bienvenue);
+				fprintf(stdout,  "HTTP/1.1 200 OK\r\nConnection: close\r\nContent-Length: 491\r\n\r\n");
+			} else {
+				fprintf(f1,"HTTP/1.1 400 Bad Request\r\nConnection: close\r\nContent-Length: 0\r\n\r\n");
+				fprintf(stdout,"HTTP/1.1 400 Bad Request\r\nConnection: close\r\nContent-Length: 0\r\n\r\n");
+			}
+
+		/*	if(strncmp(buff, "GET / HTTP/1.1\r\n", 18) == 0){
 				fprintf(stdout,  "HTTP/1.1 200 OK\r\nConnection: close\r\nContent-Length: 489\r\n\r\n");
 				fprintf(f1, "HTTP/1.1 200 OK\r\nConnection: close\r\nContent-Length: 489\r\n\r\n");
 				fprintf(f1, "<AWSBis>: %s", message_bienvenue);
@@ -90,7 +111,7 @@ int main (void)
 			} else {
 				fprintf(stdout,"HTTP/1.1 400 Bad Request\r\nConnection: close\r\nContent-Length: 0\r\n\r\n");
 				fprintf(f1,"HTTP/1.1 400 Bad Request\r\nConnection: close\r\nContent-Length: 0\r\n\r\n");
-			}
+			}*/
 			fclose(f1);			
 			exit(1);
 		}
