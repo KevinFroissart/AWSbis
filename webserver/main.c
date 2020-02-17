@@ -48,7 +48,9 @@ void skip_headers(FILE *client){
 }
 
 void send_status(FILE *client, int code, const char *reason_phrase){
-
+	char msg[124];
+	sprintf(msg, "HTTP/1.1 %d %s\n\r", code, reason_phrase);
+	fprintf(client, msg);
 }
 
 int main (void)
@@ -78,6 +80,8 @@ int main (void)
 
 			char buff[8192];
 
+							
+
 			http_request requete;
 
 			FILE * f1;
@@ -92,10 +96,11 @@ int main (void)
 			skip_headers(f1);
 
 			if(requete.method == HTTP_GET){
-				fprintf(stdout, requete.target);
-				fprintf(f1, "HTTP/1.1 200 OK\r\nConnection: close\r\nContent-Length: 491\r\n\r\n");
+				send_status(f1, 200, "OK");
+				//fprintf(f1, "HTTP/1.1 200 OK\r\nConnection: close\r\nContent-Length: 491\r\n\r\n");
+				
 				fprintf(f1, "<AWSBis>: %s", message_bienvenue);
-				fprintf(stdout,  "HTTP/1.1 200 OK\r\nConnection: close\r\nContent-Length: 491\r\n\r\n");
+				
 			} else {
 				fprintf(f1,"HTTP/1.1 400 Bad Request\r\nConnection: close\r\nContent-Length: 0\r\n\r\n");
 				fprintf(stdout,"HTTP/1.1 400 Bad Request\r\nConnection: close\r\nContent-Length: 0\r\n\r\n");
