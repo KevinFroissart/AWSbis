@@ -10,6 +10,8 @@
 #include <stdlib.h>
 #include "http_parse.h"
 
+http_request request;
+
 pid_t fils;
 
 void traitement_signal(int sig)
@@ -49,8 +51,16 @@ void skip_headers(FILE *client){
 
 void send_status(FILE *client, int code, const char *reason_phrase){
 	char msg[124];
-	sprintf(msg, "HTTP/1.1 %d %s\n\r", code, reason_phrase);
+	sprintf(msg, "HTTP/1.1 %d %s\r\n", code, reason_phrase);
 	fprintf(client, msg);
+}
+
+void send_response(FILE *client, int code, const char *reason_phrase, const char *message_body){
+	char msg[512];
+	send_status(client, code, reason_phrase);
+	sprintf(msg, "Connection: close\r\nContent-Length: %lu\r\n\r\n", sizeof(message_body));	
+	fprintf(client, msg);
+	fprintf(client, message_body);
 }
 
 int main (void)
@@ -80,22 +90,28 @@ int main (void)
 
 			char buff[8192];
 
-							
-
-			http_request requete;
-
 			FILE * f1;
 			if((f1 = fdopen(socket_client, "a+")) == NULL)
 				perror("fdopen");
 
 			fgets_or_exit(buff, sizeof(buff), f1);
 
-			if(parse_http_request(buff, &requete) == 0)
-				fprintf(stdout, "Requete invalide !\n");
+			int bad_request = 0;
 
+			if(parse_http_request(buff, &request) == 0)
+				bad_request = 1;
 			skip_headers(f1);
 
-			if(requete.method == HTTP_GET){
+			if(bad_request)
+				send_response(f1, 400, "Bad Request", "Bad request\r\n");
+			else if(request.method == HTTP_UNSUPPORTED)
+				send_response(f1, 405, "Method Not Allowed", "Method Not Allowed\r\n");
+			else if(strcmp(request.target, "/" ) == 0)
+				send_response(f1, 200, "OK", message_bienvenue);
+			else
+				send_response(f1, 404, "Not Found", "Not Found\r\n");
+
+/*			if(requete.method == HTTP_GET){
 				send_status(f1, 200, "OK");
 				//fprintf(f1, "HTTP/1.1 200 OK\r\nConnection: close\r\nContent-Length: 491\r\n\r\n");
 				
@@ -105,7 +121,7 @@ int main (void)
 				fprintf(f1,"HTTP/1.1 400 Bad Request\r\nConnection: close\r\nContent-Length: 0\r\n\r\n");
 				fprintf(stdout,"HTTP/1.1 400 Bad Request\r\nConnection: close\r\nContent-Length: 0\r\n\r\n");
 			}
-
+*/
 		/*	if(strncmp(buff, "GET / HTTP/1.1\r\n", 18) == 0){
 				fprintf(stdout,  "HTTP/1.1 200 OK\r\nConnection: close\r\nContent-Length: 489\r\n\r\n");
 				fprintf(f1, "HTTP/1.1 200 OK\r\nConnection: close\r\nContent-Length: 489\r\n\r\n");
