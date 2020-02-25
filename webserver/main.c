@@ -15,7 +15,7 @@ http_request request;
 
 pid_t fils;
 
-struct stat *stats;
+struct stat stats;
 
 void traitement_signal(int sig)
 {
@@ -81,12 +81,24 @@ FILE *check_and_open(const char *target, const char *document_root) {
 }
 
 int get_file_size(int fd) {
-	//fileno(fd) ??
-	fstat(fd, stats);
-	return stats->st_size;
+	if(fstat(fd, &stats) != -1)
+		return stats.st_size;
+	return -1;	
 }
 
-
+int copy(FILE *in, FILE *out) {
+	int return_value = -1;
+	int fd = fileno(in);
+	get_file_size(fd);
+	char *buffer = malloc(stats.st_size);
+	if(buffer){
+		fread(buffer, 1, stats.st_size, in);
+		return_value = 0;
+	}
+	fclose(in);
+	send_response(out, 200, "OK", buffer);
+	return return_value;
+}
 
 int main (void)
 {
@@ -143,14 +155,7 @@ int main (void)
 					if(fichier == NULL) 
 						send_response(f1, 404, "Not Found", "Not Found\r\n");
 					else {
-						fseek(fichier, 0, SEEK_END);
-  						int length = ftell(fichier);
-  						fseek(fichier, 0, SEEK_SET);
-  						char *buffer = malloc(length);
-  						if(buffer)
-  							fread (buffer, 1, length, fichier);
-  						fclose (fichier);
-						send_response(f1, 200, "OK", buffer);
+						copy(fichier, f1);
 					}
 				}
     		}
