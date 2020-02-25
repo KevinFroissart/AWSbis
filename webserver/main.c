@@ -1,18 +1,21 @@
 #include <stdio.h>
 #include <string.h>
-#include <sys/types.h>  
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <unistd.h>
-#include "socket.h"
-#include <signal.h>
-#include <sys/wait.h>
 #include <stdlib.h>
+#include <signal.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/stat.h>
+#include <sys/wait.h>
+#include <netinet/in.h>
+#include "socket.h"
 #include "http_parse.h"
 
 http_request request;
 
 pid_t fils;
+
+struct stat *stats;
 
 void traitement_signal(int sig)
 {
@@ -52,16 +55,38 @@ void skip_headers(FILE *client){
 void send_status(FILE *client, int code, const char *reason_phrase){
 	char msg[124];
 	sprintf(msg, "HTTP/1.1 %d %s\r\n", code, reason_phrase);
-	fprintf(client, msg);
+	fprintf(client, "%s", msg);
 }
 
 void send_response(FILE *client, int code, const char *reason_phrase, const char *message_body){
 	char msg[512];
 	send_status(client, code, reason_phrase);
 	sprintf(msg, "Connection: close\r\nContent-Length: %lu\r\n\r\n", strlen(message_body));	
-	fprintf(client, msg);
-	fprintf(client, message_body);
+	fprintf(client, "%s", msg);
+	fprintf(client, "%s", message_body);
 }
+
+char *rewrite_target(char *target) {
+	char *ptr;
+	ptr = strchr(target, '?');
+	if(ptr != NULL)
+	    *ptr = '\0';
+	return ptr;
+}
+
+FILE *check_and_open(const char *target, const char *document_root) {
+	char * targeted_document = strdup(document_root);
+	strcat(targeted_document, target);
+	return fopen(targeted_document, "r");
+}
+
+int get_file_size(int fd) {
+	//fileno(fd) ??
+	fstat(fd, stats);
+	return stats->st_size;
+}
+
+
 
 int main (void)
 {
@@ -109,8 +134,25 @@ int main (void)
 					send_response(f1, 505, "HTTP Version Not Supported", "HTTP Version Not Supported\r\n");
     			else if(strcmp(request.target, "/") == 0)
     		  		send_response(f1, 200, "OK", message_bienvenue);
-    			else
-    		  		send_response (f1, 404, "Not Found", "Not Found\r\n");
+    			else {
+					char cwd[1024];
+					getcwd(cwd, sizeof(cwd));
+					rewrite_target(request.target);
+					FILE * fichier = check_and_open(request.target, cwd);
+
+					if(fichier == NULL) 
+						send_response(f1, 404, "Not Found", "Not Found\r\n");
+					else {
+						fseek(fichier, 0, SEEK_END);
+  						int length = ftell(fichier);
+  						fseek(fichier, 0, SEEK_SET);
+  						char *buffer = malloc(length);
+  						if(buffer)
+  							fread (buffer, 1, length, fichier);
+  						fclose (fichier);
+						send_response(f1, 200, "OK", buffer);
+					}
+				}
     		}
 			fclose(f1);			
 			exit(1);
