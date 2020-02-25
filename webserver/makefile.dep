@@ -1,3 +1,0 @@
-socket.o: socket.c socket.h
-http_parse.o: http_parse.c http_parse.h
-main.o: main.c socket.h http_parse.h
