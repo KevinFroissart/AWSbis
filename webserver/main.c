@@ -53,13 +53,13 @@ void skip_headers(FILE *client){
 }
 
 void send_status(FILE *client, int code, const char *reason_phrase){
-	char msg[124];
+	char msg[256];
 	sprintf(msg, "HTTP/1.1 %d %s\r\n", code, reason_phrase);
 	fprintf(client, "%s", msg);
 }
 
 void send_response(FILE *client, int code, const char *reason_phrase, const char *message_body){
-	char msg[512];
+	char msg[128];
 	send_status(client, code, reason_phrase);
 	sprintf(msg, "Connection: close\r\nContent-Length: %lu\r\n\r\n", strlen(message_body));	
 	fprintf(client, "%s", msg);
@@ -67,6 +67,8 @@ void send_response(FILE *client, int code, const char *reason_phrase, const char
 }
 
 char *rewrite_target(char *target) {
+	if(strcmp(target, "/" ) == 0)
+		strcat(target, "/index.html");
 	char *ptr;
 	ptr = strchr(target, '?');
 	if(ptr != NULL)
@@ -75,7 +77,10 @@ char *rewrite_target(char *target) {
 }
 
 FILE *check_and_open(const char *target, const char *document_root) {
-	char * targeted_document = strdup(document_root);
+	char * targeted_document = malloc(sizeof(document_root));
+	targeted_document = strdup(document_root);
+	targeted_document = realloc(targeted_document, sizeof(targeted_document) + sizeof(target) + 500*sizeof(char));
+	strcat(targeted_document, "/site");
 	strcat(targeted_document, target);
 	return fopen(targeted_document, "r");
 }
@@ -123,7 +128,7 @@ int main (void)
 			close(socket_client);
 
 		} else {
-			const char * message_bienvenue = "Bonjour, bienvenue sur mon serveur\nCe serveur a ete cree par les soins de Maxence et Kevin\nCe n'est que le début mais il devrait vite y avoir des ameliorations\nVoici un passage d'Harry Potter en anglais\nCela vous permettra de travailler votre anglais\net aussi vous rappeler quelques souvenirs\n\" if you want to go back, I won’t blame you, \" he [Harry] said.\n\" You can take the Cloak, I won’t need it now. \"\n\" Don’t be stupid, \" said Ron.\n\" We’re coming, \" said Hermione.\n\n\n";
+			//const char * message_bienvenue = "Bonjour, bienvenue sur mon serveur\nCe serveur a ete cree par les soins de Maxence et Kevin\nCe n'est que le début mais il devrait vite y avoir des ameliorations\nVoici un passage d'Harry Potter en anglais\nCela vous permettra de travailler votre anglais\net aussi vous rappeler quelques souvenirs\n\" if you want to go back, I won’t blame you, \" he [Harry] said.\n\" You can take the Cloak, I won’t need it now. \"\n\" Don’t be stupid, \" said Ron.\n\" We’re coming, \" said Hermione.\n\n\n";
 
 			char buff[8192];
 
@@ -154,9 +159,8 @@ int main (void)
 
 					if(fichier == NULL) 
 						send_response(f1, 404, "Not Found", "Not Found\r\n");
-					else {
+					else
 						copy(fichier, f1);
-					}
 				}
     		}
 			fclose(f1);			
