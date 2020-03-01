@@ -81,7 +81,7 @@ FILE *check_and_open(const char *target, const char *document_root) {
 	targeted_document = strdup(document_root);
 	targeted_document = realloc(targeted_document, sizeof(targeted_document) + sizeof(target) + 500*sizeof(char));
 	strcat(targeted_document, "/site");
-	s>trcat(targeted_document, target);
+	strcat(targeted_document, target);
 	return fopen(targeted_document, "r");
 }
 
