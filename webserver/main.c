@@ -17,6 +17,8 @@ pid_t fils;
 
 struct stat stats;
 
+char mime_type[1024];
+
 void traitement_signal(int sig)
 {
 	fprintf(stderr, "Signal %d reçu \n", sig);
@@ -61,7 +63,13 @@ void send_status(FILE *client, int code, const char *reason_phrase){
 void send_response(FILE *client, int code, const char *reason_phrase, const char *message_body){
 	char msg[128];
 	send_status(client, code, reason_phrase);
-	sprintf(msg, "Connection: close\r\nContent-Length: %lu\r\n\r\n", strlen(message_body));	
+	fprintf(stdout, mime_type);
+	char mime_copy[128];
+	char *mime_output;
+	strcpy(mime_copy, mime_type);
+	mime_output = strtok(mime_copy,":"); // find the first double quote
+	fprintf(stdout, mime_output);
+	sprintf(msg, "Content-Length: %lu\r\nAccept: */*\r\nConnection: close\r\n\r\n", strlen(message_body));
 	fprintf(client, "%s", msg);
 	fprintf(client, "%s", message_body);
 }
@@ -82,6 +90,11 @@ FILE *check_and_open(const char *target, const char *document_root) {
 	targeted_document = realloc(targeted_document, sizeof(targeted_document) + sizeof(target) + 500*sizeof(char));
 	strcat(targeted_document, "/site");
 	strcat(targeted_document, target);
+	char fileCommand[1024];
+	sprintf(fileCommand, "file -i %s", targeted_document);
+	FILE *fp = popen(fileCommand, "r");
+	while(fgets(mime_type, sizeof(mime_type), fp) != NULL){}
+	pclose(fp);
 	return fopen(targeted_document, "r");
 }
 
