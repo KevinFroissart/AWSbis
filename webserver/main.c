@@ -19,14 +19,12 @@ struct stat stats;
 
 char mime_type[1024];
 
-void traitement_signal(int sig)
-{
+void traitement_signal(int sig){
 	fprintf(stderr, "Signal %d reçu \n", sig);
 	waitpid(fils, NULL, WNOHANG);
 }
 
-void initialiser_signaux(void) 
-{
+void initialiser_signaux(void) {
 	if(signal(SIGPIPE, SIG_IGN) == SIG_ERR)
 		perror ("signal");
 
@@ -62,14 +60,11 @@ void send_status(FILE *client, int code, const char *reason_phrase){
 
 void send_response(FILE *client, int code, const char *reason_phrase, const char *message_body){
 	char msg[128];
-	send_status(client, code, reason_phrase);
-	fprintf(stdout, mime_type);
-	char mime_copy[128];
-	char *mime_output;
-	strcpy(mime_copy, mime_type);
-	mime_output = strtok(mime_copy,":"); // find the first double quote
-	fprintf(stdout, mime_output);
-	sprintf(msg, "Content-Length: %lu\r\nAccept: */*\r\nConnection: close\r\n\r\n", strlen(message_body));
+	send_status(client, code, reason_phrase);	
+	//char * mime_parsed = strtok(mime_type, ":");
+	//mime_parsed = strtok(NULL, ":");
+	sprintf(msg, "Content-Length: %lu\n\rConnection: close\r\n\r\n", strlen(message_body));
+	fprintf(stdout, "%s", msg);
 	fprintf(client, "%s", msg);
 	fprintf(client, "%s", message_body);
 }
@@ -115,6 +110,7 @@ int copy(FILE *in, FILE *out) {
 	}
 	fclose(in);
 	send_response(out, 200, "OK", buffer);
+	fprintf(out, "%s", buffer);
 	return return_value;
 }
 
