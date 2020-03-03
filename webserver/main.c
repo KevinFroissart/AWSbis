@@ -58,12 +58,16 @@ void send_status(FILE *client, int code, const char *reason_phrase){
 	fprintf(client, "%s", msg);
 }
 
-void send_response(FILE *client, int code, const char *reason_phrase, const char *message_body){
+void send_response(FILE *client, int code, const char *reason_phrase, const char *message_body, int content_type){
 	char msg[128];
 	send_status(client, code, reason_phrase);	
-	//char * mime_parsed = strtok(mime_type, ":");
-	//mime_parsed = strtok(NULL, ":");
-	sprintf(msg, "Content-Length: %lu\n\rConnection: close\r\n\r\n", strlen(message_body));
+	if(content_type){
+		char * mime_parsed = strtok(mime_type, ":");
+		mime_parsed = strtok(NULL, ":");
+		sprintf(msg, "Content-Length: %lu\n\rContent-Type:%s\rConnection: close\r\n\r\n", strlen(message_body), mime_parsed);
+	}
+	else
+		sprintf(msg, "Content-Length: %lu\n\rConnection: close\r\n\r\n", strlen(message_body));
 	fprintf(stdout, "%s", msg);
 	fprintf(client, "%s", msg);
 	fprintf(client, "%s", message_body);
@@ -71,12 +75,21 @@ void send_response(FILE *client, int code, const char *reason_phrase, const char
 
 char *rewrite_target(char *target) {
 	if(strcmp(target, "/" ) == 0)
-		strcat(target, "/index.html");
+		strcat(target, "index.html");
 	char *ptr;
 	ptr = strchr(target, '?');
 	if(ptr != NULL)
 	    *ptr = '\0';
 	return ptr;
+}
+
+char * define_mime_type(const char * document){
+	char fileCommand[1024];
+	sprintf(fileCommand, "file -i %s", document);
+	FILE *fp = popen(fileCommand, "r");
+	while(fgets(mime_type, sizeof(mime_type), fp) != NULL){}
+	pclose(fp);
+	return mime_type;
 }
 
 FILE *check_and_open(const char *target, const char *document_root) {
@@ -85,11 +98,11 @@ FILE *check_and_open(const char *target, const char *document_root) {
 	targeted_document = realloc(targeted_document, sizeof(targeted_document) + sizeof(target) + 500*sizeof(char));
 	strcat(targeted_document, "/site");
 	strcat(targeted_document, target);
-	char fileCommand[1024];
-	sprintf(fileCommand, "file -i %s", targeted_document);
-	FILE *fp = popen(fileCommand, "r");
-	while(fgets(mime_type, sizeof(mime_type), fp) != NULL){}
-	pclose(fp);
+
+	char *tempo = malloc(sizeof(document_root) + 500);
+	sprintf(tempo, "/mnt/c/Users/Froissart\\ Kévin/git/froissart_bourdin_projetc/webserver/site");
+	strcat(tempo, target);
+	define_mime_type(/*targeted_document*/tempo);
 	return fopen(targeted_document, "r");
 }
 
@@ -109,8 +122,9 @@ int copy(FILE *in, FILE *out) {
 		return_value = 0;
 	}
 	fclose(in);
-	send_response(out, 200, "OK", buffer);
+	send_response(out, 200, "OK", buffer, 0);
 	fprintf(out, "%s", buffer);
+	free(buffer);
 	return return_value;
 }
 
@@ -151,23 +165,23 @@ int main (void)
 
     		if(parse_http_request(buff, &request) == 0){
     			if(request.method == HTTP_UNSUPPORTED)
-    		  		send_response(f1, 405, "Method Not Allowed", "Method Not Allowed\r\n");
+    		  		send_response(f1, 405, "Method Not Allowed", "Method Not Allowed\r\n", 0);
     			else
-    		  		send_response(f1, 400, "Bad Request", "Bad request\r\n");
+    		  		send_response(f1, 400, "Bad Request", "Bad request\r\n", 0);
     		} 
 			else if(parse_http_request(buff, &request) == 1) {
 				if(!(request.http_major == 1 && (request.http_minor == 1 || request.http_minor == 0)))
-					send_response(f1, 505, "HTTP Version Not Supported", "HTTP Version Not Supported\r\n");
-    			else if(strcmp(request.target, "/") == 0)
-    		  		send_response(f1, 200, "OK", message_bienvenue);
-    			else {
-					char cwd[1024];
+					send_response(f1, 505, "HTTP Version Not Supported", "HTTP Version Not Supported\r\n", 0);
+    			else if(strstr(request.target, "/../"))
+					send_response(f1, 403, "Forbidden", "Forbidden\r\n", 0);
+				else {
+					char cwd[8192];
 					getcwd(cwd, sizeof(cwd));
 					rewrite_target(request.target);
 					FILE * fichier = check_and_open(request.target, cwd);
 
 					if(fichier == NULL) 
-						send_response(f1, 404, "Not Found", "Not Found\r\n");
+						send_response(f1, 404, "Not Found", "Not Found\r\n", 0);
 					else
 						copy(fichier, f1);
 				}
