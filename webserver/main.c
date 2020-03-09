@@ -14,7 +14,7 @@ pid_t fils;
 void traitement_signal(int sig)
 {
 	printf("Signal %d reçu \n", sig);
-	waitpid(fils, NULL, 0);
+	waitpid(fils, NULL, WNOHANG);
 }
 
 void initialiser_signaux(void) 
