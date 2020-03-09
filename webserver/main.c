@@ -50,7 +50,7 @@ int main (void)
 			write(socket_client, buff, sizeof(buff));
 			memset(buff, 0, sizeof(buff));
 		}
-		
+		exit(1);
 	}
 
 	return 0;
