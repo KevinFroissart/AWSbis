@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include "socket.h"
 #include <signal.h>
+#include <stdlib.h>
 
 void initialiser_signaux(void) 
 {
