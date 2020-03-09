@@ -122,12 +122,9 @@ int copy(FILE *in, FILE *out) {
 		return_value = 0;
 	}
 	fclose(in);
-
-	if(strcmp(mime_type, "png"))
-		send_response(out, 200, "OK", buffer, 1);
-	else
-		send_response(out, 200, "OK", buffer, 0);
-	fprintf(out, "%s", buffer);
+	send_status(out, 200, "OK");
+	fprintf(out, "Content-Length: %d\r\n\r\n", (int)stats.st_size);	
+	fwrite(buffer, 1, stats.st_size, out);
 	free(buffer);
 	return return_value;
 }
