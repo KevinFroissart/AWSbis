@@ -99,9 +99,11 @@ FILE *check_and_open(const char *target, const char *document_root) {
 	targeted_document = realloc(targeted_document, sizeof(targeted_document) + sizeof(target) + 500*sizeof(char));
 	strcat(targeted_document, "/site");
 	strcat(targeted_document, target);
-	char buffer[BUFFER_SIZE];
-	while((fread(buffer, 1, BUFFER_SIZE, in)) > 0){
-		fwrmpo*/);
+
+	//char *tempo = malloc(sizeof(document_root) + 500);
+	//sprintf(tempo, "/mnt/c/Users/Froissart\\ Kévin/git/froissart_bourdin_projetc/webserver/site");
+	//strcat(tempo, target);
+	define_mime_type(targeted_document/*tempo*/);
 	return fopen(targeted_document, "r");
 }
 
