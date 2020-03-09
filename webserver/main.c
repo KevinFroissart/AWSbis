@@ -11,6 +11,8 @@
 #include "socket.h"
 #include "http_parse.h"
 
+#define BUFFER_SIZE 4096
+
 http_request request;
 
 pid_t fils;
@@ -93,8 +95,7 @@ char * define_mime_type(const char * document){
 }
 
 FILE *check_and_open(const char *target, const char *document_root) {
-	char * targeted_document = malloc(sizeof(document_root));
-	targeted_document = strdup(document_root);
+	char * targeted_document = strdup(document_root);
 	targeted_document = realloc(targeted_document, sizeof(targeted_document) + sizeof(target) + 500*sizeof(char));
 	strcat(targeted_document, "/site");
 	strcat(targeted_document, target);
@@ -113,7 +114,7 @@ int get_file_size(int fd) {
 }
 
 void send_ok(FILE *client){
-	char msg[128];
+	char msg[256];
 	send_status(client, 200, "OK");
 	char * mime_parsed = strtok(mime_type, ":");
 	mime_parsed = strtok(NULL, ":");
@@ -121,20 +122,15 @@ void send_ok(FILE *client){
 	fprintf(client, "%s", msg);
 }
 
-int copy(FILE *in, FILE *out) {
-	int return_value = -1;
+void copy(FILE *in, FILE *out) {
 	int fd = fileno(in);
 	get_file_size(fd);
-	char buffer = malloc(stats.st_size);
-	if(buffer){
-		fread(buffer, 1, stats.st_size, in);
-		return_value = 0;
+	send_ok(out);
+	char buffer[BUFFER_SIZE];
+	while((fread(buffer, 1, BUFFER_SIZE, in)) > 0){
+		fwrite(buffer, 1, BUFFER_SIZE, out);
 	}
 	fclose(in);
-	send_ok(out);
-	fwrite(buffer, 1, stats.st_size, out);
-	free(buffer);
-	return return_value;
 }
 
 int main (void)
@@ -160,8 +156,6 @@ int main (void)
 			close(socket_client);
 
 		} else {
-			//const char * message_bienvenue = "Bonjour, bienvenue sur mon serveur\nCe serveur a ete cree par les soins de Maxence et Kevin\nCe n'est que le début mais il devrait vite y avoir des ameliorations\nVoici un passage d'Harry Potter en anglais\nCela vous permettra de travailler votre anglais\net aussi vous rappeler quelques souvenirs\n\" if you want to go back, I won’t blame you, \" he [Harry] said.\n\" You can take the Cloak, I won’t need it now. \"\n\" Don’t be stupid, \" said Ron.\n\" We’re coming, \" said Hermione.\n\n\n";
-
 			char buff[8192];
 
 			FILE * f1;
