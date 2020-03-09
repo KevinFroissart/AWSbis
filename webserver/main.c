@@ -112,6 +112,15 @@ int get_file_size(int fd) {
 	return -1;	
 }
 
+void send_ok(FILE *client){
+	char msg[128];
+	send_status(client, 200, "OK");
+	char * mime_parsed = strtok(mime_type, ":");
+	mime_parsed = strtok(NULL, ":");
+	sprintf(msg, "Content-Length: %d\n\rContent-Type:%s\rConnection: close\r\n\r\n", (int)stats.st_size, mime_parsed);
+	fprintf(client, "%s", msg);
+}
+
 int copy(FILE *in, FILE *out) {
 	int return_value = -1;
 	int fd = fileno(in);
@@ -122,8 +131,7 @@ int copy(FILE *in, FILE *out) {
 		return_value = 0;
 	}
 	fclose(in);
-	send_status(out, 200, "OK");
-	fprintf(out, "Content-Length: %d\r\n\r\n", (int)stats.st_size);	
+	send_ok(out);
 	fwrite(buffer, 1, stats.st_size, out);
 	free(buffer);
 	return return_value;
