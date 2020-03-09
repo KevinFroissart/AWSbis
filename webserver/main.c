@@ -59,7 +59,7 @@ int main (void)
 			char buff[256];
 			
 			FILE * f1;
-			if((f1 = fdopen(socket_client, "r+")) == NULL)
+			if((f1 = fdopen(socket_client, "a+")) == NULL)
 				perror("fdopen");
 			
 			fprintf(f1, "<AWSBis>: %s", message_bienvenue);
