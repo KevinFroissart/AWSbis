@@ -69,8 +69,9 @@ int main (void)
 				fprintf(f1, buff);
 				memset(buff, 0, sizeof(buff));
 			}
+			fclose(f1);
+			exit(1);
 		}
-		exit(1);
 	}
 	return 0;
 }
