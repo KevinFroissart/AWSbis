@@ -125,7 +125,7 @@ int copy(FILE *in, FILE *out) {
 	int return_value = -1;
 	int fd = fileno(in);
 	get_file_size(fd);
-	char *buffer = malloc(stats.st_size);
+	char buffer = malloc(stats.st_size);
 	if(buffer){
 		fread(buffer, 1, stats.st_size, in);
 		return_value = 0;
