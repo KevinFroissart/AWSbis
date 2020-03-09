@@ -99,10 +99,10 @@ FILE *check_and_open(const char *target, const char *document_root) {
 	strcat(targeted_document, "/site");
 	strcat(targeted_document, target);
 
-	char *tempo = malloc(sizeof(document_root) + 500);
-	sprintf(tempo, "/mnt/c/Users/Froissart\\ Kévin/git/froissart_bourdin_projetc/webserver/site");
-	strcat(tempo, target);
-	define_mime_type(/*targeted_document*/tempo);
+	//char *tempo = malloc(sizeof(document_root) + 500);
+	//sprintf(tempo, "/mnt/c/Users/Froissart\\ Kévin/git/froissart_bourdin_projetc/webserver/site");
+	//strcat(tempo, target);
+	define_mime_type(targeted_document/*tempo*/);
 	return fopen(targeted_document, "r");
 }
 
@@ -122,7 +122,11 @@ int copy(FILE *in, FILE *out) {
 		return_value = 0;
 	}
 	fclose(in);
-	send_response(out, 200, "OK", buffer, 0);
+
+	if(strcmp(mime_type, "png"))
+		send_response(out, 200, "OK", buffer, 1);
+	else
+		send_response(out, 200, "OK", buffer, 0);
 	fprintf(out, "%s", buffer);
 	free(buffer);
 	return return_value;
