@@ -96,20 +96,22 @@ int main (void)
 
 			fgets_or_exit(buff, sizeof(buff), f1);
 
-			int bad_request = 0;
-
-			if(parse_http_request(buff, &request) == 0)
-				bad_request = 1;
 			skip_headers(f1);
 
-			if(bad_request)
-				send_response(f1, 400, "Bad Request", "Bad request\r\n");
-			else if(request.method == HTTP_UNSUPPORTED)
-				send_response(f1, 405, "Method Not Allowed", "Method Not Allowed\r\n");
-			else if(strcmp(request.target, "/" ) == 0)
-				send_response(f1, 200, "OK", message_bienvenue);
-			else
-				send_response(f1, 404, "Not Found", "Not Found\r\n");
+    		if(parse_http_request(buff, &request) == 0){
+    			if(request.method == HTTP_UNSUPPORTED)
+    		  		send_response(f1, 405, "Method Not Allowed", "Method Not Allowed\r\n");
+    			else
+    		  		send_response(f1, 400, "Bad Request", "Bad request\r\n");
+    		} 
+			else if(parse_http_request(buff, &request) == 1) {
+				if(!(request.http_major == 1 && (request.http_minor == 1 || request.http_minor == 0)))
+					send_response(f1, 505, "HTTP Version Not Supported", "HTTP Version Not Supported\r\n");
+    			else if(strcmp(request.target, "/") == 0)
+    		  		send_response(f1, 200, "OK", message_bienvenue);
+    			else
+    		  		send_response (f1, 404, "Not Found", "Not Found\r\n");
+    		}
 			fclose(f1);			
 			exit(1);
 		}
