@@ -68,7 +68,7 @@ int main (void)
 				fprintf(stdout,  "HTTP/1.1 200 OK\r\nConnection: close\r\nContent-Length: 489\r\n\r\n");
 				fprintf(f1, "HTTP/1.1 200 OK\r\nConnection: close\r\nContent-Length: 489\r\n\r\n");
 				fprintf(f1, "<AWSBis>: %s", message_bienvenue);
-			} else if(strncmp(buff, "GET /", 5) == 0){
+			} else if(strcmp(buff, "GET /inexistant HTTP/1.1\r\n") == 0){
 				fprintf(stdout,  "HTTP/1.1 404 Not Found\r\nConnection: close\r\nContent-Length: 0\r\n\r\n");
 				fprintf(f1, "HTTP/1.1 404 Not Found\r\nConnection: close\r\nContent-Length: 0\r\n\r\n");
 			} else {
